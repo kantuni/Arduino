@@ -11,10 +11,10 @@ int p4 = 4, p5 = 5, p6 = 6, p7 = 7,
 int aa1, aa2, aa3, aa4, aa5;
 bool d = false;
 
-
 int brightness = 255;
 int fadeAmount = 5;
 bool turnOff = false;
+
 
 // fade out functionality (provide pin)
 // start
@@ -26,7 +26,9 @@ void fadeOut(int pin) {
   brightness -= fadeAmount;
 
   if (brightness <= 0) {
+    // switch back to digital
     digitalWrite(p9, LOW);
+    // finish turn off process
     turnOff = false;
   }
 
@@ -56,6 +58,7 @@ void setup() {
 }
 
 void loop() {
+  // if turn off process is on
   if (turnOff) {
     fadeOut(p9);
   }
@@ -64,6 +67,7 @@ void loop() {
     switch (results.value) {
       // on
       case 0xFD00FF: {
+        // toggle lights
         digitalWrite(p5, !digitalRead(p5));
         digitalWrite(p6, !digitalRead(p6));
         break;
@@ -79,7 +83,7 @@ void loop() {
         }
         break;
       }
-      // rewind (<<)
+      // rewind
       case 0xFD20DF: {
         if (aa3 == 0) {
           digitalWrite(p8, HIGH);
@@ -90,7 +94,7 @@ void loop() {
         }
         break;
       }
-      // forward (>>)
+      // forward
       case 0xFD609F: {
         if (aa4 == 0) {
           digitalWrite(p9, HIGH);
@@ -117,7 +121,7 @@ void loop() {
         d = !d;
         break;
       }
-      // eq
+      // equalizer
       case 0xFDB04F: {
         if (digitalRead(p9) == LOW) {
           digitalWrite(p9, HIGH);
