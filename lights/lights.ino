@@ -6,11 +6,14 @@ IRrecv irrecv(RECEIVER_PIN);
 decode_results results;
 
 const int pins[8] = {4, 5, 6, 7, 8, 9, 10, 11};
-bool blink = false;
 
 int brightness = 255;
 int fadeAmount = 5;
 bool turnOff = false;
+
+unsigned long previousMillis = 0;
+const unsigned long interval = 1000;
+bool blink = false;
 
 
 void fadeOut(int pin) {
@@ -55,7 +58,6 @@ void loop() {
       }
       // volume up
       case 0xFD807F: {
-        // TODO:
         blink = !blink;
         break;
       }
@@ -96,9 +98,10 @@ void loop() {
   }
 
   if (blink) {
-    digitalWrite(pins[3], HIGH);
-    delay(500);
-    digitalWrite(pins[3], LOW);
-    delay(500);
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= interval) {
+      previousMillis = currentMillis;
+      digitalWrite(pins[3], !digitalRead(pins[3]));
+    }
   }
 }
