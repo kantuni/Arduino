@@ -28,7 +28,6 @@ void fadeOut(int pin) {
   const unsigned long currentMillis = millis();
   if (fadeOutNow and currentMillis - previousFadeOutMillis >= fadeOutInterval) {
     previousFadeOutMillis = currentMillis;
-    // set the brightness of the pin
     analogWrite(pin, brightness);
     
     // reduce the brightness
