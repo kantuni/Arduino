@@ -60,6 +60,7 @@ void loop() {
       case 0xFD807F: {
         blink = !blink;
         if (!blink) {
+          // turn off blinking immediately
           digitalWrite(pins[3], LOW);
         }
         break;
