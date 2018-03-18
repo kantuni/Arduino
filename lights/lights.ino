@@ -53,7 +53,7 @@ void loop() {
     switch (results.value) {
       // on
       case 0xFD00FF: {
-        digitalWrite(pins[1], !digitalRead(pins[1]));
+        // TODO:
         digitalWrite(pins[2], !digitalRead(pins[2]));
         break;
       }
