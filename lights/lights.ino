@@ -32,11 +32,11 @@ void fadeOut(int pin) {
     analogWrite(pin, brightness);
     
     // reduce the brightness
-    brightness -= fade_amount;
+    brightness -= fadeAmount;
     
     if (brightness <= 0) {
       analogWrite(pin, 0);
-      fade_out_now = false;
+      fadeOutNow = false;
     }
   }
 }
