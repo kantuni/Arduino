@@ -25,7 +25,6 @@ bool fade_out_now = false;
 
 
 void fade_out(int pin) {
-  // fade out without delay
   const unsigned long current_ms = millis();
   if (fade_out_now and current_ms - previous_fade_out_ms >= fade_out_interval) {
     previous_fade_out_ms = current_ms;
@@ -112,7 +111,6 @@ void loop() {
   }
 
   if (blink) {
-    // blink without delay
     unsigned long current_ms = millis();
     if (current_ms - previous_blink_ms >= blink_interval) {
       previous_blink_ms = current_ms;
