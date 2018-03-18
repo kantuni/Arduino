@@ -12,28 +12,28 @@ const int pins[8] = {4, 5, 6, 7, 8, 9, 10, 11};
 bool a1 = false;
 
 // blink
-unsigned long previous_blink_ms = 0;
-const unsigned long blink_interval = 500;
+unsigned long previousBlinkMillis = 0;
+const unsigned long blinkInterval = 500;
 bool blink = false;
 
 // fade out
-unsigned long previous_fade_out_ms = 0;
-const unsigned long fade_out_interval = 20;
+unsigned long previousFadeOutMillis = 0;
+const unsigned long fadeOutInterval = 20;
 int brightness = 255;
-const int fade_amount = 5;
-bool fade_out_now = false;
+const int fadeAmount = 5;
+bool fadeOutNow = false;
 
 
-void fade_out(int pin) {
-  const unsigned long current_ms = millis();
-  if (fade_out_now and current_ms - previous_fade_out_ms >= fade_out_interval) {
-    previous_fade_out_ms = current_ms;
+void fadeOut(int pin) {
+  const unsigned long currentMillis = millis();
+  if (fadeOutNow and currentMillis - previousFadeOutMillis >= fadeOutInterval) {
+    previousFadeOutMillis = currentMillis;
     // set the brightness of the pin
     analogWrite(pin, brightness);
-  
+    
     // reduce the brightness
     brightness -= fade_amount;
-  
+    
     if (brightness <= 0) {
       analogWrite(pin, 0);
       fade_out_now = false;
@@ -100,7 +100,7 @@ void loop() {
           brightness = 255;
           analogWrite(pins[5], brightness);
         } else {
-          fade_out_now = true;
+          fadeOutNow = true;
         }
         break;
       }
@@ -111,14 +111,14 @@ void loop() {
   }
 
   if (blink) {
-    unsigned long current_ms = millis();
-    if (current_ms - previous_blink_ms >= blink_interval) {
-      previous_blink_ms = current_ms;
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousBlinkMillis >= blinkInterval) {
+      previousBlinkMillis = currentMillis;
       digitalWrite(pins[3], !digitalRead(pins[3]));
     }
   }
 
-  if (fade_out_now) {
-    fade_out(pins[5]);
+  if (fadeOutNow) {
+    fadeOut(pins[5]);
   }
 }
