@@ -1,16 +1,16 @@
 #include <IRremote.h>
 
-// set receiver pin
+// set IR receiver pin
 const int RECEIVER_PIN = 15;
 IRrecv irrecv(RECEIVER_PIN);
 decode_results results;
 
-int pins[8] = {4, 5, 6, 7, 8, 9, 10, 11};
-bool d = false;
+const int pins[8] = {4, 5, 6, 7, 8, 9, 10, 11};
+bool blink = false;
 
 int brightness = 255;
 int fadeAmount = 5;
-bool turnOn = false;
+bool turnOff = false;
 
 
 void fadeOut(int pin) {
@@ -23,8 +23,7 @@ void fadeOut(int pin) {
   if (brightness <= 0) {
     // switch back to digital
     digitalWrite(pins[5], LOW);
-    // finish turn off process
-    turnOn = false;
+    turnOff = false;
   }
 
   // wait for 20 ms to see the dimming effect
@@ -32,7 +31,7 @@ void fadeOut(int pin) {
 }
 
 void setup() {
-  // enable receiver decoding
+  // enable IR receiver decoding
   irrecv.enableIRIn();
 
   // configure the pins to behave as OUTPUTs
@@ -42,18 +41,22 @@ void setup() {
 }
 
 void loop() {
-  // if turn off process is on
-  if (turnOn) {
-    fadeOut(p9);
+  if (turnOff) {
+    fadeOut(pins[5]);
   }
 
   if (irrecv.decode(&results)) {
     switch (results.value) {
       // on
       case 0xFD00FF: {
-        // toggle lights
         digitalWrite(pins[1], !digitalRead(pins[1]));
         digitalWrite(pins[2], !digitalRead(pins[2]));
+        break;
+      }
+      // volume up
+      case 0xFD807F: {
+        // TODO:
+        blink = !blink;
         break;
       }
       // func / stop
@@ -66,27 +69,22 @@ void loop() {
         digitalWrite(pins[4], !digitalRead(pins[4]));
         break;
       }
-      // forward
-      case 0xFD609F: {
-        digitalWrite(pins[5], !digitalRead(pins[5]));
-        break;
-      }
       // play
       case 0xFDA05F: {
         digitalWrite(pins[6], !digitalRead(pins[6]));
         break;
       }
-      // volume up
-      case 0xFD807F: {
-        d = !d;
+      // forward
+      case 0xFD609F: {
+        digitalWrite(pins[5], !digitalRead(pins[5]));
         break;
       }
       // equalizer
       case 0xFDB04F: {
-        if (digitalRead(p9) == LOW) {
-          digitalWrite(p9, HIGH);
+        if (digitalRead(pins[5]) == LOW) {
+          digitalWrite(pins[5], HIGH);
         } else {
-          turnOn = true;
+          turnOff = true;
           brightness = 255;
         }
         break;
@@ -97,10 +95,10 @@ void loop() {
     irrecv.resume();
   }
 
-  if (d) {
-    digitalWrite(p7, HIGH);
+  if (blink) {
+    digitalWrite(pins[3], HIGH);
     delay(500);
-    digitalWrite(p7, LOW);
+    digitalWrite(pins[3], LOW);
     delay(500);
   }
 }
