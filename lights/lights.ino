@@ -12,7 +12,7 @@ int fadeAmount = 5;
 bool turnOff = false;
 
 unsigned long previousMillis = 0;
-const unsigned long interval = 1000;
+const unsigned long interval = 500;
 bool blink = false;
 
 
@@ -59,6 +59,9 @@ void loop() {
       // volume up
       case 0xFD807F: {
         blink = !blink;
+        if (!blink) {
+          digitalWrite(pins[3], LOW);
+        }
         break;
       }
       // func / stop
