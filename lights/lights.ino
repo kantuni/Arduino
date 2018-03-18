@@ -5,32 +5,37 @@ const int RECEIVER_PIN = 15;
 IRrecv irrecv(RECEIVER_PIN);
 decode_results results;
 
+// pin numbers
 const int pins[8] = {4, 5, 6, 7, 8, 9, 10, 11};
 
-int brightness = 255;
-int fadeAmount = 5;
-bool turnOff = false;
-
-unsigned long previousMillis = 0;
-const unsigned long interval = 500;
+// blink
+unsigned long previous_blink_ms = 0;
+const unsigned long blink_interval = 500;
 bool blink = false;
 
+// fade out
+unsigned long previous_fade_out_ms = 0;
+const unsigned long fade_out_interval = 20;
+int brightness = 255;
+const int fade_amount = 5;
+bool fade_out_now = false;
 
-void fadeOut(int pin) {
-  // set the brightness of the pin
-  analogWrite(pin, brightness);
 
-  // reduce the brightness
-  brightness -= fadeAmount;
-
-  if (brightness <= 0) {
-    // switch back to digital
-    digitalWrite(pins[5], LOW);
-    turnOff = false;
+void fade_out(int pin) {
+  const unsigned long current_ms = millis();
+  if (fade_out_now and current_ms - previous_fade_out_ms >= fade_out_interval) {
+    previous_fade_out_ms = current_ms;
+    // set the brightness of the pin
+    analogWrite(pin, brightness);
+  
+    // reduce the brightness
+    brightness -= fade_amount;
+  
+    if (brightness <= 0) {
+      analogWrite(pin, 0);
+      fade_out_now = false;
+    }
   }
-
-  // wait for 20 ms to see the dimming effect
-  delay(20);
 }
 
 void setup() {
@@ -44,10 +49,6 @@ void setup() {
 }
 
 void loop() {
-  if (turnOff) {
-    fadeOut(pins[5]);
-  }
-
   if (irrecv.decode(&results)) {
     switch (results.value) {
       // on
@@ -87,11 +88,11 @@ void loop() {
       }
       // equalizer
       case 0xFDB04F: {
-        if (digitalRead(pins[5]) == LOW) {
-          digitalWrite(pins[5], HIGH);
-        } else {
-          turnOff = true;
+        if (analogRead(pins[5]) == 0) {
           brightness = 255;
+          analogWrite(pins[5], brightness);
+        } else {
+          fade_out_now = true;
         }
         break;
       }
@@ -102,10 +103,14 @@ void loop() {
   }
 
   if (blink) {
-    unsigned long currentMillis = millis();
-    if (currentMillis - previousMillis >= interval) {
-      previousMillis = currentMillis;
+    unsigned long current_ms = millis();
+    if (current_ms - previous_blink_ms >= blink_interval) {
+      previous_blink_ms = current_ms;
       digitalWrite(pins[3], !digitalRead(pins[3]));
     }
+  }
+
+  if (fade_out_now) {
+    fade_out(pins[5]);
   }
 }
