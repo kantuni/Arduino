@@ -5,11 +5,11 @@ const int RECEIVER_PIN = 15;
 IRrecv irrecv(RECEIVER_PIN);
 decode_results results;
 
-// pin numbers
-const int pins[8] = {4, 5, 6, 7, 8, 9, 10, 11};
-
-// analogs
-bool a1 = false;
+const int p2 = 2, p3 = 3, p4 = 4, 
+          p5 = 5, p6 = 6, p7 = 7,
+          p8 = 8, p9 = 9, p10 = 10;
+const int ap0 = A0, ap1 = A1;
+bool onIsActive = false;
 
 // blink
 unsigned long previousBlinkMillis = 0;
@@ -23,7 +23,7 @@ int brightness = 255;
 const int fadeAmount = 5;
 bool fadeOutNow = false;
 
-
+/*
 void fadeOut(int pin) {
   const unsigned long currentMillis = millis();
   if (fadeOutNow and currentMillis - previousFadeOutMillis >= fadeOutInterval) {
@@ -39,15 +39,24 @@ void fadeOut(int pin) {
     }
   }
 }
+*/
 
 void setup() {
-  // enable IR receiver decoding
+  // enable IR receiver
   irrecv.enableIRIn();
 
-  // configure the pins to behave as OUTPUTs
-  for (int i = 0; i < 8; i++) {
-    pinMode(pins[i], OUTPUT);
-  }
+  // as output pins
+  pinMode(p2, OUTPUT);
+  pinMode(p3, OUTPUT);
+  pinMode(p4, OUTPUT);
+  pinMode(p5, OUTPUT);
+  pinMode(p6, OUTPUT);
+  pinMode(p7, OUTPUT);
+  pinMode(p8, OUTPUT);
+  pinMode(p9, OUTPUT);
+  pinMode(p10, OUTPUT);
+  pinMode(ap0, OUTPUT);
+  pinMode(ap1, OUTPUT);
 }
 
 void loop() {
@@ -55,6 +64,20 @@ void loop() {
     switch (results.value) {
       // on
       case 0xFD00FF: {
+        if (onIsActive) {
+          analogWrite(p6, 0);
+          analogWrite(ap0, 0);
+          // analogWrite(ap1, 0);
+          // analogWrite(ap2, 0);
+        } else {
+          analogWrite(p6, 255);
+          analogWrite(ap0, 100);
+          // analogWrite(ap1, 100);
+          // analogWrite(ap2, 100);
+        }
+        onIsActive = !onIsActive;
+        
+        /*
         if (a1) {
           analogWrite(pins[1], 0);
         } else {
@@ -62,8 +85,10 @@ void loop() {
         }
         a1 = !a1;
         digitalWrite(pins[2], !digitalRead(pins[2]));
+        */
         break;
       }
+      /*
       // volume up
       case 0xFD807F: {
         blink = !blink;
@@ -104,11 +129,13 @@ void loop() {
         break;
       }
     }
+    */
 
     // resume recieving commands
     irrecv.resume();
   }
 
+  /*
   if (blink) {
     unsigned long currentMillis = millis();
     if (currentMillis - previousBlinkMillis >= blinkInterval) {
@@ -120,4 +147,5 @@ void loop() {
   if (fadeOutNow) {
     fadeOut(pins[5]);
   }
+  */
 }
