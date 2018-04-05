@@ -20,7 +20,8 @@ bool onIsActive = false,
      downIsActive = false,
      upIsActive = false;
 
-bool isLeftTurnSignalActive = false;
+bool isLeftTurnSignalActive = false,
+     isRightTurnSignalActive = false;
 
 
 // blink
@@ -131,7 +132,7 @@ void loop() {
       // forward
       case 0xFD609F: {
         // right turn signal
-        // TODO: blink p5
+        isRightTurnSignalActive = !isRightTurnSignalActive;
         break;
       }
       // down
@@ -164,6 +165,11 @@ void loop() {
 
   if (isLeftTurnSignalActive) {
     digitalWrite(p7, !digitalRead(p7));
+    // blink(p7, 300, 500, 0);
+  }
+
+  if (isRightTurnSignalActive) {
+    digitalWrite(p5, !digitalRead(p5));
     // blink(p7, 300, 500, 0);
   }
 }
