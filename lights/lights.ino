@@ -20,50 +20,9 @@ bool onIsActive = false,
      downIsActive = false,
      upIsActive = false;
 
-bool isLeftTurnSignalActive = false,
-     isRightTurnSignalActive = false;
-
-
-// blink
-unsigned long previousMillis[2];
-
-void blink(int ledPin, int tOn, int tOff, int index) {
-  // unsigned long currentMillis = millis();
-  static int timer = tOn;
-  
-  if (millis() - previousMillis[index] >= timer) {
-    if (digitalRead(ledPin) == HIGH) timer = tOff;
-    else timer = tOn;
-    
-    digitalWrite(ledPin, !digitalRead(ledPin));
-    previousMillis[index] = millis();
-  }
-}
-
-/*
-// fade out
-unsigned long previousFadeOutMillis = 0;
-const unsigned long fadeOutInterval = 20;
-int brightness = 255;
-const int fadeAmount = 5;
-bool fadeOutNow = false;
-
-void fadeOut(int pin) {
-  const unsigned long currentMillis = millis();
-  if (fadeOutNow and currentMillis - previousFadeOutMillis >= fadeOutInterval) {
-    previousFadeOutMillis = currentMillis;
-    analogWrite(pin, brightness);
-    
-    // reduce the brightness
-    brightness -= fadeAmount;
-    
-    if (brightness <= 0) {
-      analogWrite(pin, 0);
-      fadeOutNow = false;
-    }
-  }
-}
-*/
+bool isLeftTurnSignalOn = false,
+     isRightTurnSignalOn = false,
+     areHazardsOn = false;
 
 
 void setup() {
@@ -106,8 +65,11 @@ void loop() {
       // volume up
       case 0xFD807F: {
         // low beam
-        if (volumeUpIsActive) analogWrite(p4, 0);
-        else analogWrite(p4, 255);
+        if (volumeUpIsActive) {
+          analogWrite(p4, 0);
+        } else {
+          analogWrite(p4, 255);
+        }
         volumeUpIsActive = !volumeUpIsActive;
         break;
       }
@@ -119,27 +81,40 @@ void loop() {
       }
       // rewind
       case 0xFD20DF: {
-        // left turn signal
-        isLeftTurnSignalActive = !isLeftTurnSignalActive;
+        // left turn signal (p5)
+        if (areHazardsOn) {
+          break;
+        }
+        isRightTurnSignalOn = false;
+        isLeftTurnSignalOn = !isLeftTurnSignalOn;
         break;
       }
       // play
       case 0xFDA05F: {
-        // hazard
-        // TODO: blink p5 and p7
+        // hazard lights
+        isLeftTurnSignalOn = false;
+        isRightTurnSignalOn = false;
+        areHazardsOn = !areHazardsOn;
         break;
       }
       // forward
       case 0xFD609F: {
         // right turn signal
-        isRightTurnSignalActive = !isRightTurnSignalActive;
+        if (areHazardsOn) {
+          break;
+        }
+        isLeftTurnSignalOn = false;
+        isRightTurnSignalOn = !isRightTurnSignalOn;
         break;
       }
       // down
       case 0xFD10EF: {
         // reverse
-        if (downIsActive) analogWrite(p10, 0);
-        else analogWrite(p10, 255);
+        if (downIsActive) {
+          analogWrite(p10, 0);
+        } else {
+          analogWrite(p10, 255);
+        }
         downIsActive = !downIsActive;
         break;
       }
@@ -152,8 +127,11 @@ void loop() {
       // up
       case 0xFD50AF: {
         // fog
-        if (upIsActive) analogWrite(p8, 0);
-        else analogWrite(p8, 255);
+        if (upIsActive) {
+          analogWrite(p8, 0);
+        } else {
+          analogWrite(p8, 255);
+        }
         upIsActive = !upIsActive;
         break;
       }
@@ -163,13 +141,26 @@ void loop() {
     irrecv.resume();
   }
 
-  if (isLeftTurnSignalActive) {
-    digitalWrite(p7, !digitalRead(p7));
-    // blink(p7, 300, 500, 0);
+  if (isLeftTurnSignalOn) {
+    digitalWrite(p7, HIGH);
+    delay(500);
+    digitalWrite(p7, LOW);
+    delay(500);
   }
 
-  if (isRightTurnSignalActive) {
-    digitalWrite(p5, !digitalRead(p5));
-    // blink(p7, 300, 500, 0);
+  if (isRightTurnSignalOn) {
+    digitalWrite(p5, HIGH);
+    delay(500);
+    digitalWrite(p5, LOW);
+    delay(500);
+  }
+
+  if (areHazardsOn) {
+    digitalWrite(p5, HIGH);
+    digitalWrite(p7, HIGH);
+    delay(500);
+    digitalWrite(p5, LOW);
+    digitalWrite(p7, LOW);
+    delay(500);
   }
 }
