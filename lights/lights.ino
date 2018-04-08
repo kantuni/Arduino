@@ -5,17 +5,18 @@ const int RECEIVER_PIN = 15;
 IRrecv irrecv(RECEIVER_PIN);
 decode_results results;
 
-const int p3 = 3,     // high beam
-          p4 = 4,     // low beam
-          p5 = 5,     // right turn signal
-          p6 = 6,     // parking
-          p7 = 7,     // left turn signal
-          p8 = 8,     // fog
-          p9 = 9,     // cabin, door
-          p10 = 10,   // reverse
-          p16 = 16,     // stop
-          REED_PIN = 2, // Reed input
-          LED_PIN = 14;  // Door light
+const int REED_PIN = 2,  // reed switch
+          LED_PIN = 14;  // door
+
+const int p3 = 3,        // high beam
+          p4 = 4,        // low beam
+          p5 = 5,        // right turn signal
+          p6 = 6,        // parking
+          p7 = 7,        // left turn signal
+          p8 = 8,        // fog
+          p9 = 9,        // cabin
+          p10 = 10,      // reverse
+          p16 = 16;      // stop
 
 bool onIsActive = false,
      volumeUpIsActive = false,
@@ -30,9 +31,10 @@ bool isLeftTurnSignalOn = false,
 void setup() {
   // enable IR receiver
   irrecv.enableIRIn();
-
-  // as output pins
-  pinMode(p16, OUTPUT);
+  
+  // set pin modes
+  pinMode(REED_PIN, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
   pinMode(p3, OUTPUT);
   pinMode(p4, OUTPUT);
   pinMode(p5, OUTPUT);
@@ -41,21 +43,12 @@ void setup() {
   pinMode(p8, OUTPUT);
   pinMode(p9, OUTPUT);
   pinMode(p10, OUTPUT);
+  pinMode(p16, OUTPUT);
   pinMode(A0, OUTPUT);
   pinMode(A1, OUTPUT);
-
-  pinMode(REED_PIN, INPUT_PULLUP);
-  pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
-  int magnet = digitalRead(REED_PIN); // Read the state of the switch.
-  if (magnet == LOW) { // If the reed pin reads low.
-    digitalWrite(LED_PIN, LOW); // Turn Led on.
-  } else {
-    digitalWrite(LED_PIN, HIGH); // Turn Led off.
-  }
-  
   if (irrecv.decode(&results)) {
     switch (results.value) {
       // on
@@ -175,4 +168,7 @@ void loop() {
     digitalWrite(p7, LOW);
     delay(500);
   }
+  
+  // reed switch
+  digitalWrite(LED_PIN, digitalRead(REED_PIN));
 }
