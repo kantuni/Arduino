@@ -5,15 +5,17 @@ const int RECEIVER_PIN = 15;
 IRrecv irrecv(RECEIVER_PIN);
 decode_results results;
 
-const int p2 = 2,     // stop
-          p3 = 3,     // high beam
+const int p3 = 3,     // high beam
           p4 = 4,     // low beam
           p5 = 5,     // right turn signal
           p6 = 6,     // parking
           p7 = 7,     // left turn signal
           p8 = 8,     // fog
           p9 = 9,     // cabin, door
-          p10 = 10;   // reverse
+          p10 = 10,   // reverse
+          p16 = 16,     // stop
+          REED_PIN = 2, // Reed input
+          LED_PIN = 14;  // Door light
 
 bool onIsActive = false,
      volumeUpIsActive = false,
@@ -30,7 +32,7 @@ void setup() {
   irrecv.enableIRIn();
 
   // as output pins
-  pinMode(p2, OUTPUT);
+  pinMode(p16, OUTPUT);
   pinMode(p3, OUTPUT);
   pinMode(p4, OUTPUT);
   pinMode(p5, OUTPUT);
@@ -41,9 +43,19 @@ void setup() {
   pinMode(p10, OUTPUT);
   pinMode(A0, OUTPUT);
   pinMode(A1, OUTPUT);
+
+  pinMode(REED_PIN, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
+  int magnet = digitalRead(REED_PIN); // Read the state of the switch.
+  if (magnet == LOW) { // If the reed pin reads low.
+    digitalWrite(LED_PIN, LOW); // Turn Led on.
+  } else {
+    digitalWrite(LED_PIN, HIGH); // Turn Led off.
+  }
+  
   if (irrecv.decode(&results)) {
     switch (results.value) {
       // on
@@ -121,7 +133,7 @@ void loop() {
       // volume down
       case 0xFD906F: {
         // stop
-        digitalWrite(p2, !digitalRead(p2));
+        digitalWrite(p16, !digitalRead(p16));
         break;
       }
       // up
