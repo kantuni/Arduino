@@ -5,9 +5,6 @@ const int RECEIVER_PIN = 15;
 IRrecv irrecv(RECEIVER_PIN);
 decode_results results;
 
-const int REED_PIN = 2,  // reed switch
-          LED_PIN = 14;  // door
-
 const int p3 = 3,        // high beam
           p4 = 4,        // low beam
           p5 = 5,        // right turn signal
@@ -25,16 +22,16 @@ bool onIsActive = false,
 
 bool isLeftTurnSignalOn = false,
      isRightTurnSignalOn = false,
+     areCabinLightsOn = false,
      areHazardsOn = false;
 
+int brightness = 250;
 
 void setup() {
   // enable IR receiver
   irrecv.enableIRIn();
   
   // set pin modes
-  pinMode(REED_PIN, INPUT_PULLUP);
-  pinMode(LED_PIN, OUTPUT);
   pinMode(p3, OUTPUT);
   pinMode(p4, OUTPUT);
   pinMode(p5, OUTPUT);
@@ -46,6 +43,9 @@ void setup() {
   pinMode(p16, OUTPUT);
   pinMode(A0, OUTPUT);
   pinMode(A1, OUTPUT);
+  // reed switches
+  pinMode(A2, INPUT_PULLUP);
+  pinMode(A3, INPUT_PULLUP);
 }
 
 void loop() {
@@ -55,14 +55,14 @@ void loop() {
       case 0xFD00FF: {
         if (onIsActive) {
           analogWrite(p6, 0); // parking
-          analogWrite(A0, 0); // tail
-          analogWrite(A1, 0); // tag
-          analogWrite(A2, 0); // dashboard
+          //analogWrite(A0, 0); // tail
+          //analogWrite(A1, 0); // tag
+          //analogWrite(A2, 0); // dashboard
         } else {
           analogWrite(p6, 255); // parking
-          analogWrite(A0, 128); // tail
-          analogWrite(A1, 128); // tag
-          analogWrite(A2, 128); // dashboard
+          //analogWrite(A0, 128); // tail
+          //analogWrite(A1, 128); // tag
+          //analogWrite(A2, 128); // dashboard
         }
         onIsActive = !onIsActive;
         break;
@@ -169,6 +169,31 @@ void loop() {
     delay(500);
   }
   
-  // reed switch
-  digitalWrite(LED_PIN, digitalRead(REED_PIN));
+  // door lights
+  digitalWrite(A1, !digitalRead(A2));
+  digitalWrite(A0, !digitalRead(A3));
+
+  // cabin lights
+  if (digitalRead(A2) and digitalRead(A3)) {
+    if (areCabinLightsOn) {
+      delay(1000);
+      brightness = 250;
+    }
+    areCabinLightsOn = false;
+  } else {
+    if (!areCabinLightsOn) {
+      brightness = 0;
+    }
+    areCabinLightsOn = true;
+  }
+
+  if (areCabinLightsOn) {
+    analogWrite(p9, 255);
+  } else {
+    if (brightness > 0) {
+      brightness -= 10;
+      analogWrite(p9, brightness);
+      delay(30);
+    }
+  }
 }
